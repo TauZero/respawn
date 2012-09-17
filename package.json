@@ -1,9 +1,12 @@
 {
-  "name": "placeholder",
-  "description": "Lightweight child process manager",
+  "name": "phoenix",
+  "description": "Lightweight child process manager for continuous node script operation",
   "keywords": [
+    "fork",
+    "sysadmin",
+    "utility"
   ],
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Brian Bickerton"
   },
@@ -17,5 +20,5 @@
     {
       "type": "BSD"
     }
-  ],
+  ]
 }

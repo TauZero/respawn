@@ -1,47 +1,38 @@
-var fs = require('fs'),
-    Child = require('./lib/Child'),
-    util = require('util');
+var Child = require('./lib/Child'),
+    utils = require('./lib/utils');
 
 var children = {};
 var respawnMax = null;
 var respawnDelay = 0;
 var shutdownInitiated = false;
-var debugLevel = 0;
 
 function forkCommand( command, options ){
     if(shutdownInitiated == true) return;
     options = options || {};
     options.command = command;
     options.respawnMax = (typeof options.respawnMax === 'undefined') ? respawnMax : options.respawnMax
-    options.onExit = function endlessChildOnExit( code, signal ){
-        if( debugLevel > 0 ){
-            console.log( '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
-        }
+    options.onExit = function managerChildOnExit( code, signal ){
+        utils.debugLog( 0, '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
         if( !shutdownInitiated ){
             if( child.respawnMax !== null && child.respawnCount > child.respawnMax ){
-                if( debugLevel >= 0 ){
-                    console.log( '[DEAD]',child.id, child.command, 'reached max respawn count.');
-                }
+                utils.debugLog( 0, '[DEAD]',child.id, child.command, 'reached max respawn count.' );
                 return;
             }
-            setTimeout(function(){child.respawn();},respawnDelay);
+            setTimeout(function(){
+                utils.debugLog( 0, '[INFO]',child.id, child.command, 'restarting for the', child.respawnCount+1, 'time')
+                child.respawn();
+            },respawnDelay);
         }
     };
-    if( debugLevel > 0 ){
-        options.onClose = function endlessChildOnClose(){
-            console.log( '[CLOSE]', child.id, child.command );
-        }
-    };
-    if( debugLevel > 0 ){
-        options.onDisconnect = function endlessChildOnDisconnect(){
-            console.log( '[DISCONNECT]', child.id, child.command );
-        }
-    };
-    if( debugLevel > 1 ){
-        options.onMessage = function endlessChildOnMessage( msg ){
-            console.log( '[MESSAGE]', child.id, child.command, JSON.stringify(msg) );
-        }
-    };
+    options.onClose = function managerChildOnClose(){
+        utils.debugLog( 1, '[CLOSE]', child.id, child.command );
+    }
+    options.onDisconnect = function managerChildOnDisconnect(){
+        utils.debugLog( 1, '[DISCONNECT]', child.id, child.command );
+    }
+    options.onMessage = function managerChildOnMessage( msg ){
+        utils.debugLog( 2, '[MESSAGE]', child.id, child.command, JSON.stringify(msg) );
+    }
     var child = new Child(options);
     child.fork();
     children[child.id] = child;
@@ -73,12 +64,6 @@ function shutdown(){
     process.exit();
 }
 
-function changeDebugLevel( level ){
-    if(typeof level === 'null') debugLevel = null;
-    if(typeof level === 'number') debugLevel = level;
-    return debugLevel;
-}
-
 function changeRespawnMax( max ){
     if(typeof respawnMax === 'null') respawnMax = 0;
     if(typeof respawnMax === 'number') respawnMax = max;
@@ -96,7 +81,7 @@ module.exports = {
     listTracked: listTracked,
     killProcess: killProcess,
     shutdown: shutdown,
-    debugLevel: changeDebugLevel,
+    debugLevel: utils.debugLevel,
     respawnMax: changeRespawnMax,
     respawnDelay: changeRespawnDelay
 }
