@@ -1,0 +1,21 @@
+{
+  "name": "placeholder",
+  "description": "Lightweight child process manager",
+  "keywords": [
+  ],
+  "version": "0.0.1",
+  "author": {
+    "name": "Brian Bickerton"
+  },
+  "directories": {
+    "lib": "."
+  },
+  "engines": {
+    "node": "0.6 || 0.8"
+  },
+  "licenses": [
+    {
+      "type": "BSD"
+    }
+  ],
+}
