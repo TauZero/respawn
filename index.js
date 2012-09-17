@@ -18,8 +18,7 @@ function forkCommand( command, options ){
             console.log( '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
         }
         if( !shutdownInitiated ){
-            console.log('Respawn count:',child.respawnCount);
-            if( child.respawnCount > child.respawnMax ){
+            if( child.respawnMax !== null && child.respawnCount > child.respawnMax ){
                 if( debugLevel >= 0 ){
                     console.log( '[DEAD]',child.id, child.command, 'reached max respawn count.');
                 }
