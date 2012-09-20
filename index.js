@@ -14,7 +14,6 @@ function forkCommand( command, options ){
     options.onExit = function managerChildOnExit( code, signal ){
         utils.debugLog( 0, '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
         if( child.bury){
-            console.log(child);
             utils.debugLog( 0, '[Info]',child.id, child.command, 'Stopped' );
             delete children[child.id];
             return;
