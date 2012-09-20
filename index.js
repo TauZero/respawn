@@ -13,6 +13,12 @@ function forkCommand( command, options ){
     options.respawnMax = (typeof options.respawnMax === 'undefined') ? respawnMax : options.respawnMax
     options.onExit = function managerChildOnExit( code, signal ){
         utils.debugLog( 0, '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
+        if( child.bury){
+            console.log(child);
+            utils.debugLog( 0, '[Info]',child.id, child.command, 'Stopped' );
+            delete children[child.id];
+            return;
+        }
         if( !shutdownInitiated ){
             if( child.respawnMax !== null && child.respawnCount > child.respawnMax ){
                 utils.debugLog( 0, '[DEAD]',child.id, child.command, 'reached max respawn count.' );
@@ -36,6 +42,7 @@ function forkCommand( command, options ){
     var child = new Child(options);
     child.fork();
     children[child.id] = child;
+    return child.id;
 };
 
 function listTracked(){
@@ -55,6 +62,15 @@ function listTracked(){
 function killProcess( id, signal ){
     return children[id] && children[id].kill( signal );
 };
+
+function buryProcess( id ){
+    var child = children[id];
+    if(child){
+        child.bury = true;
+        child.kill();
+    }
+    else return;
+}
 
 function shutdown(){
     shutdownInitiated = true;
@@ -80,6 +96,7 @@ module.exports = {
     forkCommand: forkCommand,
     listTracked: listTracked,
     killProcess: killProcess,
+    buryProcess: buryProcess,
     shutdown: shutdown,
     debugLevel: utils.debugLevel,
     respawnMax: changeRespawnMax,
