@@ -1,24 +1,18 @@
 {
-  "name": "phoenix",
+  "name": "respawn",
   "description": "Lightweight child process manager for continuous node script operation",
   "keywords": [
     "fork",
     "sysadmin",
-    "utility"
+    "utility",
+    "restart"
   ],
   "version": "0.0.3",
   "author": {
     "name": "Brian Bickerton"
   },
-  "directories": {
-    "lib": "."
-  },
   "engines": {
-    "node": "0.6 || 0.8"
+    "node": ">=0.6"
   },
-  "licenses": [
-    {
-      "type": "BSD"
-    }
-  ]
+  "licenses": "MIT"
 }
