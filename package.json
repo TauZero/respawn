@@ -11,6 +11,11 @@
   "author": {
     "name": "Brian Bickerton"
   },
+  "bugs": "https://github.com/TauZero/respawn/issues",
+  "repository":{
+    "type": "git",
+    "url": "https://github.com/TauZero/respawn"
+  },
   "engines": {
     "node": ">=0.6"
   },
