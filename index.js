@@ -11,33 +11,47 @@ function forkCommand( command, options ){
     options = options || {};
     options.command = command;
     options.respawnMax = (typeof options.respawnMax === 'undefined') ? respawnMax : options.respawnMax
-    options.onExit = function managerChildOnExit( code, signal ){
-        utils.debugLog( 0, '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
-        if( child.bury){
-            utils.debugLog( 0, '[Info]',child.id, child.command, 'Stopped' );
-            delete children[child.id];
-            return;
-        }
-        if( !shutdownInitiated ){
-            if( child.respawnMax !== null && child.respawnCount > child.respawnMax ){
-                utils.debugLog( 0, '[DEAD]',child.id, child.command, 'reached max respawn count.' );
+    options.onExit = (function(onExit){
+        return function managerChildOnExit( code, signal ){
+            utils.debugLog( 0, '[EXIT]',child.id, child.command, 'Code:', code, 'Signal:', signal );
+            if(onExit) onExit();
+
+            if( child.bury){
+                utils.debugLog( 0, '[Info]',child.id, child.command, 'Stopped' );
+                delete children[child.id];
                 return;
             }
-            setTimeout(function(){
-                utils.debugLog( 0, '[INFO]',child.id, child.command, 'restarting for the', child.respawnCount+1, 'time')
-                child.respawn();
-            },respawnDelay);
+            if( !shutdownInitiated ){
+                if( child.respawnMax !== null && child.respawnCount > child.respawnMax ){
+                    utils.debugLog( 0, '[DEAD]',child.id, child.command, 'reached max respawn count.' );
+                    return;
+                }
+                setTimeout(function(){
+                    utils.debugLog( 0, '[INFO]',child.id, child.command, 'restarting for the', child.respawnCount+1, 'time')
+                    child.respawn();
+                },respawnDelay);
+            }
         }
-    };
-    options.onClose = function managerChildOnClose(){
-        utils.debugLog( 1, '[CLOSE]', child.id, child.command );
-    }
-    options.onDisconnect = function managerChildOnDisconnect(){
-        utils.debugLog( 1, '[DISCONNECT]', child.id, child.command );
-    }
-    options.onMessage = function managerChildOnMessage( msg ){
-        utils.debugLog( 2, '[MESSAGE]', child.id, child.command, JSON.stringify(msg) );
-    }
+    })(options.onExit);
+    options.onClose = (function(onClose){
+        return function managerChildOnClose(){
+            utils.debugLog( 1, '[CLOSE]', child.id, child.command );
+            if(onClose) onClose();
+        };
+    })(options.onClose);
+    options.onDisconnect = (function(onDisconnect){
+        return function managerChildOnDisconnect(){
+            utils.debugLog( 1, '[DISCONNECT]', child.id, child.command );
+            if(onDisconnect) onDisconnect();
+        };
+    })(options.onDisconnect);
+    options.onMessage = (function(onMessage){
+        return function managerChildOnMessage( msg ){
+            utils.debugLog( 2, '[MESSAGE]', child.id, child.command, JSON.stringify(msg) );
+            if(onMessage) onMessage(msg);
+        };
+    })(options.onMessage);
+
     var child = new Child(options);
     child.fork();
     children[child.id] = child;
